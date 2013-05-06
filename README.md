@@ -14,7 +14,7 @@ Send SMS from a connected device with 3G modem. This package requires Gammu to s
 
 ## Installation for Node.js ##
 
-  npm install sms
+	npm install sms
 
 ## Usage on command line ##
 
