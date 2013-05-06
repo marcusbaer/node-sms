@@ -16,11 +16,17 @@ Send SMS from a connected device with 3G modem. This package requires Gammu to s
 
   npm install sms
 
-## Usage ##
+## Usage on command line ##
 
-	var sendsms = require('sms');
+	sendsms --pin=1234 --to=010000000 --message="Hallo Welt"
 
-	sendsms({
+## Usage as library ##
+
+	var sms = require('sms');
+
+	sms.pin(1234);
+
+	sms.send({
 	  to: '01000000000',    // Recipient Phone Number
 	  text: 'Hello World!'  // Text to send
 	}, function(err, result) {
