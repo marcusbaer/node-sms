@@ -1,5 +1,3 @@
-﻿#!/usr/bin/env node
-
 var argv = require('optimist').argv,
     sms = require(__dirname + '/../lib/sendsms');
 
@@ -10,7 +8,9 @@ if (argv.pin) {
 sms.getsms(function(messages){
     console.log(messages);
 });
+
 /*
+
 sms.send({
     to: argv.to,       	  // Recipient Phone Number
     text: argv.message    // Text to send
