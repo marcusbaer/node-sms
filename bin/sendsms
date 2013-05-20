@@ -7,6 +7,10 @@ if (argv.pin) {
 	sms.pin(argv.pin);
 }
 
+sms.getsms(function(messages){
+    console.log(messages);
+});
+/*
 sms.send({
     to: argv.to,       	  // Recipient Phone Number
     text: argv.message    // Text to send
@@ -17,3 +21,4 @@ sms.send({
     }
     console.log(result);
 });
+*/
