@@ -16,7 +16,27 @@ Send SMS from a connected device with 3G modem. This package requires Gammu to s
 
 	npm install sms
 
-## Usage on command line ##
+## SMS Reader ##
+
+SMS reader has 3 different modes:
+
+1. a register mode
+2. a render mode
+3. a read mode
+
+Other command line applications can register to be informed by a call of some command line code:
+
+	smsreader --register=foo
+
+Calling the reader without parameters is the render mode: after a given timeout SMS are called from gateway. If there is a new message, all registered applications are called to fetch messages by calling with read mode.
+
+	smsreader
+
+Fetch messages with read mode:
+	
+	smsreader --read
+
+## SMS Sender ##
 
 	sendsms --pin=1234 --to=010000000 --message="Hallo Welt"
 

@@ -1,1 +1,1 @@
-﻿module.exports = require('./lib/sendsms');
+﻿module.exports = require('./lib/sms');

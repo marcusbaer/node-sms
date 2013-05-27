@@ -23,10 +23,13 @@
 		"npm": ">=1.2.14"
 	},
 	"dependencies": {
-		"optimist": "~0.3.5"
+		"dirty": "~0.9.7",
+		"optimist": "~0.3.5",
+		"MD5": ">=1.0.3"
 	},
 	"bin": {
-		"sendsms": "./bin/sendsms"
+		"sendsms": "./bin/sendsms",
+		"smsreader": "./bin/smsreader"
 	},
 	"main": "./index.js"
 }
