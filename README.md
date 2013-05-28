@@ -38,7 +38,7 @@ Fetch messages with read mode:
 
 ## SMS Sender ##
 
-	sendsms --pin=1234 --to=010000000 --message="Hallo Welt"
+	sendsms --pin=1234 --to=010000000 --message="Hello World"
 
 ## Usage as library ##
 

@@ -1,6 +1,6 @@
 ﻿{
 	"name": "sms",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Send SMS from a connected device with 3G modem.",
 	"homepage": "http://github.com/marcusbaer/node-sms",
     "keywords": ["sms", "text messages", "text", "messages", "short message service", "service", "gammu", "wammu"],
@@ -25,6 +25,8 @@
 	"dependencies": {
 		"dirty": "~0.9.7",
 		"optimist": "~0.3.5",
+		"underscore": "~1.4.4",
+		"backbone": "~1.0.0",
 		"MD5": ">=1.0.3"
 	},
 	"bin": {
