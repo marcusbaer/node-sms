@@ -1,4 +1,5 @@
 ﻿module.exports = {
+	"timeout": 10000,
     "pin": "1234",
     "messageSeparator": 'Speicherplatz ([0-9]{1,3}), Ordner "([a-zA-Z]{3,})", ([a-zA-Z\-]{3,}), ([a-zA-Z]{3,})',
     "separatorAttributes": ['messageId', 'folder', 'storage', 'folderName'],
