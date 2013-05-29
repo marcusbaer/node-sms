@@ -22,6 +22,7 @@ Adjust `gateway.config.js` to your system:
 
 - timeout: time between two message fetches
 - pin: PIN1 of your GSM card
+- datasource: path to data source file
 - messageSeparator: regular expression to detect each message and find some attributes
 - separatorAttributes: ordered list of attribute keys, correspondig to "messageSeparator"
 - bodyDefinition: regular expression to find a bunch of attributes from a message

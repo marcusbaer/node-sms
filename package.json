@@ -1,7 +1,7 @@
 ﻿{
 	"name": "sms",
-	"version": "0.0.4",
-	"description": "Send SMS from a connected device with 3G modem.",
+	"version": "0.0.5",
+	"description": "Send and receive SMS from a connected device with 3G modem.",
 	"homepage": "http://github.com/marcusbaer/node-sms",
     "keywords": ["sms", "text messages", "text", "messages", "short message service", "service", "gammu", "wammu"],
 	"author": "Marcus Baer <info@baer-media.com>",
@@ -30,8 +30,7 @@
 		"MD5": ">=1.0.3"
 	},
 	"bin": {
-		"sendsms": "./bin/sendsms",
-		"smsreader": "./bin/smsreader"
+		"smsd": "./bin/smsd"
 	},
 	"main": "./index.js"
 }

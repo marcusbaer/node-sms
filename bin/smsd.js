@@ -1,15 +1,15 @@
 ﻿var argv = require('optimist').argv;
 var sms = require('../lib/sms');
+var models = require('../lib/models');
 var fs = require('fs');
 var config = require('../config/gateway.config');
 var md5 = require('MD5');
-var dirty = require('dirty');
-var Backbone = require('backbone');
 var _ = require('underscore');
-var db = dirty('../data/messages.db');
+var dirty = require('dirty');
+var db = dirty(argv.datasource || config.datasource || '../data/messages.db');
 
 /*
-	SMSREADER can be called with an optional register parameter, that allows a script to register as a service that likes to be informed about incoming messages.
+	SMSD can be called with an optional register parameter, that allows a script to register as a service that likes to be informed about incoming messages.
 	All registered services are called on updates.
 */
 
@@ -17,31 +17,11 @@ var nl = (process.platform === 'win32' ? '\r\n' : '\n');
 
 var listener = [];
 
-var Message = Backbone.Model.extend({
-	defaults: {
-		messageId: null,
-		folder: null,
-		storage: null,
-		folderName: null,
-		smsc: null,
-		sendDateStr: null,
-		encoding: null,
-		phoneNumber: null,
-		status: null,
-		message: null,
-		hash: null
-	}
-});
-
-var Messages = Backbone.Collection.extend({
-	model: Message
-});
-
-storedMessages = new Messages();
+storedMessages = new models.Messages();
 
 db.on('load', function() {
 	listener = db.get('listener') || [];
-	storedMessages = new Messages(db.get('messages') || []);
+	storedMessages = new models.Messages(db.get('messages') || []);
 //    db.forEach(function(key, val) { console.log('Found key: %s, val: %j', key, val); });
 
 	if (argv.register) {
@@ -93,8 +73,7 @@ function getMessagesFromGateway () {
 
 function renderMessages (callback) {
 
-	//fs.readFile('../config/getallsms.txt', 'utf8', function(error, response){
-	sms.getsms(function(response){
+	var getMessagesCallback = function(response){
 		
 		var headers = new RegExp(config.messageSeparator,'g');
 		var matcher = response.match(headers);
@@ -130,7 +109,7 @@ function renderMessages (callback) {
 					var idx = new Number(index) + 1;
 					message[attribute] = RegExp['$'+idx];
 				}
-				message.hash = md5(message.sendDateStr + message.phoneNumber + 'smsreader');
+				message.hash = md5(message.sendDateStr + message.phoneNumber + 'smsd');
 
 				var matchingMessages = storedMessages.where({hash: message.hash});
 				if (_.isEmpty(matchingMessages)) {
@@ -144,5 +123,14 @@ function renderMessages (callback) {
 			callback(updatesFound);
 		}
 
-	});
+	};
+
+	if (argv.simulate) {
+		fs.readFile(argv.simulate, 'utf8', function (error, response) {
+			getMessagesCallback(response);
+		});
+	} else {
+		sms.getsms(getMessagesCallback);
+	}
+
 }
