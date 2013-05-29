@@ -14,7 +14,18 @@ Send SMS from a connected device with 3G modem. This package requires Gammu to s
 
 ## Installation for Node.js ##
 
-	npm install sms
+	npm install -g sms
+
+## Setup ##
+
+Adjust `gateway.config.js` to your system:
+
+- timeout: time between two message fetches
+- pin: PIN1 of your GSM card
+- messageSeparator: regular expression to detect each message and find some attributes
+- separatorAttributes: ordered list of attribute keys, correspondig to "messageSeparator"
+- bodyDefinition: regular expression to find a bunch of attributes from a message
+- bodyAttributes: is the ordered list of attribute keys, corresponding to "bodyDefinition"
 
 ## SMS Reader ##
 
