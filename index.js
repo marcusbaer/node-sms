@@ -9,13 +9,17 @@ db.on('load', function() {
 	storedMessages = new models.Messages(db.get('messages') || []);
 });
 
-var Reader = {
+var Reader = module.exports.reader = {
 
 	readMessages: function (callback) {
-		db.on('load', function() {
-			storedMessages = new models.Messages(db.get('messages') || []);
-			callback(storedMessages);
-		});
+        if (storedMessages) {
+            callback(storedMessages);
+        } else {
+            db.on('load', function() {
+                storedMessages = new models.Messages(db.get('messages') || []);
+                callback(storedMessages);
+            });
+        }
 	},
 	
 	registerCommand: function (command, callback) {
@@ -31,5 +35,3 @@ var Reader = {
 	}
 
 };
-
-module.exports.reader = Reader;
