@@ -2,6 +2,7 @@
 var config = require('./config/gateway.config');
 var dirty = require('dirty');
 var db = dirty(config.datasource || './data/messages.db');
+var sms = require('./lib/sms');
 
 var storedMessages = new models.Messages();
 
@@ -31,6 +32,24 @@ var Reader = module.exports.reader = {
 					callback();
 				}
 			});
+		});
+	}
+
+};
+
+var Sender = module.exports.sender = {
+
+	sendMessage: function (messageObj) {
+        // messageObj has attributes: to (phone number), message (text), success (callback)
+		sms.send({
+			to: messageObj.to,       	// Recipient Phone Number
+			text: messageObj.message    // Text to send
+		}, function(err, result) {
+			// error message in String and result information in JSON
+			if (err) {
+				console.log(err);
+			}
+			messageObj.success(result);
 		});
 	}
 
