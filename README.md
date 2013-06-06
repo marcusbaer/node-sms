@@ -38,15 +38,15 @@ SMS reader has 3 different modes:
 
 Other command line applications can register to be informed by a call of some command line code:
 
-	smsreader --register=foo
+	smsd --register=foo
 
 Calling the reader without parameters is the render mode: after a given timeout SMS are called from gateway. If there is a new message, all registered applications are called to fetch messages by calling with read mode.
 
-	smsreader
+	smsd
 
 Fetch messages with read mode:
 	
-	smsreader --read
+	smsd --read
 
 ## SMS Sender ##
 

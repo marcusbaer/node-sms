@@ -59,6 +59,7 @@ function getMessagesFromGateway () {
 	renderMessages(function(updatesFound){
 		if (updatesFound) {
 			db.set("messages", storedMessages.toJSON(), function messagesSaved (){
+                sms.reset(); // remove all messages
 				listener = db.get('listener') || []; // read from data source, as listener could have been added while running
 				if (listener && listener.length>0) {
 					for (var i=0; i<listener.length; i++) {
