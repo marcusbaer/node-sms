@@ -1,9 +1,9 @@
-﻿{
+{
 	"name": "sms",
 	"version": "0.0.7",
 	"description": "Send and receive SMS from a connected device with 3G modem.",
 	"homepage": "http://github.com/marcusbaer/node-sms",
-    "keywords": ["sms", "text messages", "text", "messages", "short message service", "service", "gammu", "wammu"],
+	"keywords": ["sms", "text messages", "text", "messages", "short message service", "service", "gammu", "wammu"],
 	"author": "Marcus Baer <info@baer-media.com>",
 	"repository": {
 		"type": "git",
@@ -12,12 +12,10 @@
 	"bugs": {
 		"url": "https://github.com/marcusbaer/node-sms/issues"
 	},
-	"licenses" : [
-        {
-            "type": "MIT",
-            "url": "http://github.com/marcusbaer/node-sms/blob/master/LICENSE"
-        }
-    ],
+	"licenses" : [{
+		"type": "MIT",
+		"url": "http://github.com/marcusbaer/node-sms/blob/master/LICENSE"
+        }],
 	"engines" : {
 		"node": ">=0.10",
 		"npm": ">=1.2.14"
