@@ -3,7 +3,6 @@ var sms = require('../lib/sms');
 var models = require('../lib/models');
 var fs = require('fs');
 var config = require('../config/gateway.config');
-var md5 = require('MD5');
 var _ = require('underscore');
 var dirty = require('dirty');
 var db = dirty(argv.datasource || config.datasource || '../data/messages.db');
@@ -110,7 +109,7 @@ function renderMessages (callback) {
 					var idx = new Number(index) + 1;
 					message[attribute] = RegExp['$'+idx];
 				}
-				message.hash = md5(message.sendDateStr + message.phoneNumber + 'smsd');
+				message.hash = encode(message.sendDateStr + message.phoneNumber + 'smsd');
 
 				var matchingMessages = storedMessages.where({hash: message.hash});
 				if (_.isEmpty(matchingMessages)) {
@@ -134,4 +133,12 @@ function renderMessages (callback) {
 		sms.getsms(getMessagesCallback);
 	}
 
+}
+
+function encode (txt) {
+    return new Buffer(txt).toString('base64');
+}
+
+function decode (txt) {
+    return new Buffer(txt, 'base64').toString('utf8');
 }
