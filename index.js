@@ -1,19 +1,19 @@
 ﻿var models = require('./lib/models');
 var config = require('./config/gateway.config');
-var dirty = require('dirty');
-var db = dirty(config.datasource || './data/messages.db');
+//var dirty = require('dirty');
+//var db = dirty(config.datasource || './data/messages.db');
 var sms = require('./lib/sms');
 
 var storedMessages = new models.Messages();
 
-db.on('load', function() {
-	storedMessages = new models.Messages(db.get('messages') || []);
-});
+//db.on('load', function() {
+//	storedMessages = new models.Messages(db.get('messages') || []);
+//});
 
 var Reader = module.exports.reader = {
 
 	fetchMessages: function (callback) {
-		sms.getsms(callback);
+		this.fetchMessagesFromGateway(callback);
 	},
 
 	removeMessages: function (callback) {
@@ -21,26 +21,83 @@ var Reader = module.exports.reader = {
 	},
 
 	readMessages: function (callback) {
-        if (storedMessages) {
-            callback(storedMessages);
-        } else {
-            db.on('load', function() {
-                storedMessages = new models.Messages(db.get('messages') || []);
-                callback(storedMessages);
-            });
-        }
+//        if (storedMessages) {
+//            callback(storedMessages);
+//        } else {
+//            db.on('load', function() {
+//                storedMessages = new models.Messages(db.get('messages') || []);
+//                callback(storedMessages);
+//            });
+//        }
 	},
-	
+
+    fetchMessagesFromGateway: function (callback) {
+
+        var getMessagesCallback = function(response){
+
+            var headers = new RegExp(config.messageSeparator,'g');
+            var matcher = response.match(headers);
+            var updatesFound = false;
+            if (matcher) {
+                for (var i=0; i<matcher.length; i++) {
+                    var message = {};
+
+                    // get header
+
+                    var header = new RegExp(config.messageSeparator,'g');
+                    header.exec(matcher[i]); //console.log(RegExp.$2);
+                    for (var index in config.separatorAttributes) {
+                        var attribute = config.separatorAttributes[index];
+                        var idx = new Number(index) + 1;
+                        message[attribute] = RegExp['$'+idx];
+                    }
+
+                    // get body
+
+                    var msgextract = response.split(matcher[i]);
+                    if (matcher[i+1]) {
+                        msgextract = msgextract[1].split(matcher[i+1]);
+                        msgextract = msgextract[0];
+                    } else {
+                        msgextract = msgextract[1];
+                    }
+
+                    var messageExp = new RegExp(config.bodyDefinition.replace(/\\r\\n/g,nl),'g');
+                    messageExp.exec(msgextract);
+                    for (var index in config.bodyAttributes) {
+                        var attribute = config.bodyAttributes[index];
+                        var idx = new Number(index) + 1;
+                        message[attribute] = RegExp['$'+idx];
+                    }
+                    message.hash = encode(message.sendDateStr + message.phoneNumber + 'smsd');
+
+                    var matchingMessages = storedMessages.where({hash: message.hash});
+                    if (_.isEmpty(matchingMessages)) {
+                        storedMessages.add(message);
+                    }
+                }
+            }
+
+            if (callback) {
+                callback(updatesFound);
+            }
+
+        };
+
+        sms.getsms(getMessagesCallback);
+
+    },
+
 	registerCommand: function (command, callback) {
-		db.on('load', function() {
-			var listener = db.get("listener");
-			listener.push( command );
-			db.set("listener", listener, function listenerSaved (){
-				if (callback) {
-					callback();
-				}
-			});
-		});
+//		db.on('load', function() {
+//			var listener = db.get("listener");
+//			listener.push( command );
+//			db.set("listener", listener, function listenerSaved (){
+//				if (callback) {
+//					callback();
+//				}
+//			});
+//		});
 	}
 
 };
