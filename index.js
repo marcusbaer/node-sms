@@ -12,6 +12,14 @@ db.on('load', function() {
 
 var Reader = module.exports.reader = {
 
+	fetchMessages: function (callback) {
+		sms.getsms(callback);
+	},
+
+	removeMessages: function (callback) {
+		sms.deletesms(callback);
+	},
+
 	readMessages: function (callback) {
         if (storedMessages) {
             callback(storedMessages);
