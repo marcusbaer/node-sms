@@ -83,22 +83,21 @@ Create `gammurc` file on Linux like:
 1. ~/.gammurc
 2. /etc/gammurc
 
-On Windows `gammurc` file is in the same directory as gammu.exe is. Read more about configuration [http://wammu.eu/docs/manual/config/](here).
+On Windows `gammurc` file is in the same directory as gammu.exe is. Read more about configuration [here](http://wammu.eu/docs/manual/config/).
 
-[gammu]
-port = /dev/ttyS0
-;port= com10:
-connection = at115200
-;synchronizetime = yes
-;logfile = /home/says/gammulog
-;logformat = textall
-;use_locking = yes
-;gammuloc = locfile
-;startinfo = yes
-;gammucoding = utf8
-;rsslevel = teststable
-;usephonedb = yes
-
+	[gammu]
+	port = /dev/ttyS0
+	;port= com10:
+	connection = at115200
+	;synchronizetime = yes
+	;logfile = /home/says/gammulog
+	;logformat = textall
+	;use_locking = yes
+	;gammuloc = locfile
+	;startinfo = yes
+	;gammucoding = utf8
+	;rsslevel = teststable
+	;usephonedb = yes
 
 Test now with:
 
