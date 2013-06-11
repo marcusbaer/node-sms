@@ -74,7 +74,9 @@ Fetch messages with read mode:
 
 Send a message with send mode:
 
-	smsd --send --to=010000000 --message="Hello World"
+	smsd --send --to=+491234567 --message="Hello World"
+
+Phone number has to be led by country code with a leading plus sign, e.g. +42123454389 !
 
 ## Usage as library ##
 

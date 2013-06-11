@@ -1,36 +1,41 @@
-﻿var models = require('./lib/models');
-var config = require('./config/gateway.config');
-//var dirty = require('dirty');
-//var db = dirty(config.datasource || './data/messages.db');
+﻿var argv = require('optimist').argv;
+var models = require('./lib/models');
+var dirty = require('dirty');
 var sms = require('./lib/sms');
+
+var verbodeMode = argv.v || false;
+var runDir = argv.d || process.cwd();
+var config = require(runDir + '/config');
+var db = dirty(runDir + '/messages.db');
 
 var storedMessages = new models.Messages();
 
-//db.on('load', function() {
-//	storedMessages = new models.Messages(db.get('messages') || []);
-//});
+db.on('load', function() {
+	storedMessages = new models.Messages(db.get('messages') || []);
+});
 
 var Reader = module.exports.reader = {
 
-	fetchMessages: function (callback) {
-		this.fetchMessagesFromGateway(callback);
-	},
+//	fetchMessages: function (callback) {
+//		this.fetchMessagesFromGateway(callback);
+//	},
 
 	removeMessages: function (callback) {
-		sms.deletesms(callback);
+		//sms.deletesms(callback);
 	},
 
 	readMessages: function (callback) {
-//        if (storedMessages) {
-//            callback(storedMessages);
-//        } else {
-//            db.on('load', function() {
-//                storedMessages = new models.Messages(db.get('messages') || []);
-//                callback(storedMessages);
-//            });
-//        }
+        if (storedMessages) {
+            callback(storedMessages);
+        } else {
+            db.on('load', function() {
+                storedMessages = new models.Messages(db.get('messages') || []);
+                callback(storedMessages);
+            });
+        }
 	},
 
+/*
     fetchMessagesFromGateway: function (callback) {
 
         var getMessagesCallback = function(response){
@@ -87,17 +92,17 @@ var Reader = module.exports.reader = {
         sms.getsms(getMessagesCallback);
 
     },
-
+*/
 	registerCommand: function (command, callback) {
-//		db.on('load', function() {
-//			var listener = db.get("listener");
-//			listener.push( command );
-//			db.set("listener", listener, function listenerSaved (){
-//				if (callback) {
-//					callback();
-//				}
-//			});
-//		});
+		db.on('load', function() {
+			var listener = db.get("listener");
+			listener.push( command );
+			db.set("listener", listener, function listenerSaved (){
+				if (callback) {
+					callback();
+				}
+			});
+		});
 	}
 
 };
@@ -107,7 +112,7 @@ var Sender = module.exports.sender = {
 	sendMessage: function (messageObj) {
         // messageObj has attributes: to (phone number), message (text), success (callback)
 		sms.send({
-			to: messageObj.to,       	// Recipient Phone Number
+			to: messageObj.to,       	// Recipient Phone Number, lead by +49...
 			text: messageObj.message    // Text to send
 		}, function(err, result) {
 			// error message in String and result information in JSON

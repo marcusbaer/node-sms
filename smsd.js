@@ -46,9 +46,23 @@ db.on('load', function() {
 	} else if (argv.send) {
 
 		// SEND MESSAGE
+		if (argv.v) {
+			sys.log("sending message...");
+		}
 
-		console.log("Nothing happens at the moment...");
-	
+		// this is a workaround for bug in optimist, please give phone numbers by a leading plus sign including country code
+		var to = new String(argv.to);
+		to = (to.indexOf('+') !== 0) ? '+' + to : to;
+		
+		sms.send({
+			to: to || '',
+			text: argv.message || ''
+		}, function messageSent (response) {
+			if (argv.v) {
+				console.log(response);
+			}
+		});
+
 	} else {
 
 		// START SMS READER
