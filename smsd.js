@@ -1,11 +1,15 @@
 ﻿var argv = require('optimist').argv;
-var sms = require('../lib/sms');
-var models = require('../lib/models');
+var sys = require('util');
 var fs = require('fs');
-var config = require('../config/gateway.config');
 var _ = require('underscore');
 var dirty = require('dirty');
-var db = dirty(argv.datasource || config.datasource || '../data/messages.db');
+var sms = require('./lib/sms');
+var models = require('./lib/models');
+
+var verbodeMode = argv.v || false;
+var runDir = argv.d || process.cwd();
+var config = require(runDir + '/config');
+var db = dirty(runDir + '/messages.db');
 
 /*
 	SMSD can be called with an optional register parameter, that allows a script to register as a service that likes to be informed about incoming messages.
@@ -39,14 +43,15 @@ db.on('load', function() {
 		//process.stdout.write(JSON.stringify(db.get('messages')));
 		process.stdout.write(JSON.stringify(storedMessages.toJSON()));
 	
+	} else if (argv.send) {
+
+		// SEND MESSAGE
+
+		console.log("Nothing happens at the moment...");
+	
 	} else {
 
 		// START SMS READER
-
-		//	if (config.pin) {
-		//		sms.pin(config.pin);
-		//	}
-
 		getMessagesFromGateway();
 
 	}
@@ -55,13 +60,23 @@ db.on('load', function() {
 });
 
 function getMessagesFromGateway () {
+	if (verbodeMode) {
+		sys.log("fetch messages from gateway...");
+	}
 	renderMessages(function(updatesFound){
 		if (updatesFound) {
+			if (verbodeMode) {
+				sys.log("storing new messages...");
+				console.log(storedMessages.toJSON());
+			}
 			db.set("messages", storedMessages.toJSON(), function messagesSaved (){
-                //sms.reset(); // remove all messages
+                //sms.deletesms(); // remove all messages
 				listener = db.get('listener') || []; // read from data source, as listener could have been added while running
 				if (listener && listener.length>0) {
 					for (var i=0; i<listener.length; i++) {
+						if (verbodeMode) {
+							sys.log("call listener: " + listener[i]);
+						}
 						sms._command(listener[i]);
 					}
 				}
@@ -74,8 +89,14 @@ function getMessagesFromGateway () {
 function renderMessages (callback) {
 
 	var getMessagesCallback = function(response){
-		
-		var headers = new RegExp(config.messageSeparator,'g');
+
+//		if (verbodeMode) {
+//			sys.log(response);
+//		}
+	
+		var pattern = config.patterns[config.patternLang];
+	
+		var headers = new RegExp(pattern.messageSeparator,'g');
 		var matcher = response.match(headers);
 		var updatesFound = false;
 		if (matcher) {
@@ -84,10 +105,10 @@ function renderMessages (callback) {
 				
 				// get header
 				
-				var header = new RegExp(config.messageSeparator,'g');
+				var header = new RegExp(pattern.messageSeparator,'g');
 				header.exec(matcher[i]); //console.log(RegExp.$2);
-				for (var index in config.separatorAttributes) {
-					var attribute = config.separatorAttributes[index];
+				for (var index in pattern.separatorAttributes) {
+					var attribute = pattern.separatorAttributes[index];
 					var idx = new Number(index) + 1;
 					message[attribute] = RegExp['$'+idx];
 				}
@@ -102,10 +123,10 @@ function renderMessages (callback) {
 					msgextract = msgextract[1];
 				}
 				
-				var messageExp = new RegExp(config.bodyDefinition.replace(/\\r\\n/g,nl),'g');
+				var messageExp = new RegExp(pattern.bodyDefinition.replace(/\\r\\n/g,nl),'g');
 				messageExp.exec(msgextract);
-				for (var index in config.bodyAttributes) {
-					var attribute = config.bodyAttributes[index];
+				for (var index in pattern.bodyAttributes) {
+					var attribute = pattern.bodyAttributes[index];
 					var idx = new Number(index) + 1;
 					message[attribute] = RegExp['$'+idx];
 				}

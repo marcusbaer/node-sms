@@ -1,8 +1,11 @@
 lib-cov
+gammurc
+config.js
 *.seed
 *.log
 *.csv
 *.dat
+*.db
 *.out
 *.pid
 *.gz
