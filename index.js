@@ -16,16 +16,16 @@ db.on('load', function() {
 
 var Reader = module.exports.reader = {
 
-//	fetchMessages: function (callback) {
-//		this.fetchMessagesFromGateway(callback);
-//	},
-
-	removeMessages: function (callback) {
+	removeMessagesFromGateway: function (callback) {
 		//sms.deletesms(callback);
 	},
 
-	readMessages: function (callback) {
-        if (storedMessages) {
+	removeMessagesFromDb: function (callback) {
+		//not implemented yet
+	},
+
+	readMessagesFromDb: function (callback) {
+        if (storedMessages && storedMessages.length>0) {
             callback(storedMessages);
         } else {
             db.on('load', function() {
@@ -35,7 +35,6 @@ var Reader = module.exports.reader = {
         }
 	},
 
-/*
     fetchMessagesFromGateway: function (callback) {
 
         var getMessagesCallback = function(response){
@@ -92,7 +91,7 @@ var Reader = module.exports.reader = {
         sms.getsms(getMessagesCallback);
 
     },
-*/
+
 	registerCommand: function (command, callback) {
 		db.on('load', function() {
 			var listener = db.get("listener");
