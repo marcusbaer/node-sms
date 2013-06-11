@@ -99,7 +99,11 @@ On Windows `gammurc` file is in the same directory as gammu.exe is or in the sam
 	;rsslevel = teststable
 	;usephonedb = yes
 
-Test now with:
+Test connection with:
 
 	gammu --identify
+	
+Send a message manually:	
+	
+	gammu sendsms TEXT 0123456789 -text "Hello Foo"
 
