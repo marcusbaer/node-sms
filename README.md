@@ -83,7 +83,7 @@ Create `gammurc` file on Linux like:
 1. ~/.gammurc
 2. /etc/gammurc
 
-On Windows `gammurc` file is in the same directory as gammu.exe is. Read more about configuration [here](http://wammu.eu/docs/manual/config/).
+On Windows `gammurc` file is in the same directory as gammu.exe is or in the same directory where you will call gammu. Read more about configuration [here](http://wammu.eu/docs/manual/config/).
 
 	[gammu]
 	port = /dev/ttyS0
