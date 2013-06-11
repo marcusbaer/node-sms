@@ -14,7 +14,7 @@ db.on('load', function() {
 	storedMessages = new models.Messages(db.get('messages') || []);
 });
 
-var Reader = module.exports.reader = {
+var Library = {
 
 	removeMessagesFromGateway: function (callback) {
 		//sms.deletesms(callback);
@@ -102,11 +102,7 @@ var Reader = module.exports.reader = {
 				}
 			});
 		});
-	}
-
-};
-
-var Sender = module.exports.sender = {
+	},
 
 	sendMessage: function (messageObj) {
         // messageObj has attributes: to (phone number), message (text), success (callback)
@@ -123,3 +119,5 @@ var Sender = module.exports.sender = {
 	}
 
 };
+
+module.exports = Library;
