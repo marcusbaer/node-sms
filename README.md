@@ -72,3 +72,35 @@ Fetch messages with read mode:
 ## More on Gammu ##
 
 For further information on Gammu read [http://de.wammu.eu/docs/pdf/gammu.pdf](http://de.wammu.eu/docs/pdf/gammu.pdf)
+
+### Gammu config example ###
+
+This is an example for a Gammu configuration. On Windows use port with COM example, adjusted to your system.
+How you can detect your modem is here [https://drupal.org/node/1804598](https://drupal.org/node/1804598).
+
+Create `gammurc` file on Linux like:
+
+1. ~/.gammurc
+2. /etc/gammurc
+
+On Windows `gammurc` file is in the same directory as gammu.exe is. Read more about configuration [http://wammu.eu/docs/manual/config/](here).
+
+[gammu]
+port = /dev/ttyS0
+;port= com10:
+connection = at115200
+;synchronizetime = yes
+;logfile = /home/says/gammulog
+;logformat = textall
+;use_locking = yes
+;gammuloc = locfile
+;startinfo = yes
+;gammucoding = utf8
+;rsslevel = teststable
+;usephonedb = yes
+
+
+Test now with:
+
+	gammu --identify
+
