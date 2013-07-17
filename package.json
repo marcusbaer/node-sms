@@ -1,6 +1,6 @@
 {
 	"name": "sms",
-	"version": "0.0.12",
+	"version": "0.0.13",
 	"description": "Send and receive SMS from a connected device with 3G modem.",
 	"homepage": "http://github.com/marcusbaer/node-sms",
 	"keywords": ["sms", "text messages", "text", "messages", "short message service", "service", "gammu", "wammu"],
