@@ -7,12 +7,17 @@ var sms = require('./lib/sms');
 var models = require('./lib/models');
 
 var verbodeMode = argv.v || false;
-var runDir = argv.d || process.cwd();
+//var runDir = (argv.d && !argv.demo) || process.cwd();
+var runDir = process.cwd();
+
+sys.log("Read smsd configuration from " + runDir + '/config.js');
+
 try {
     var config = require(runDir + '/config');
 } catch (e) {
     throw "No configuration file found. See documentation to add configuration to current working path!";
 }
+
 var db = dirty(runDir + '/messages.db');
 
 /*

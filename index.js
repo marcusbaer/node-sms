@@ -3,8 +3,8 @@ var models = require('./lib/models');
 var dirty = require('dirty');
 var sms = require('./lib/sms');
 
-var verbodeMode = argv.v || false;
-var runDir = argv.d || process.cwd();
+//var runDir = argv.d || process.cwd();
+var runDir = process.cwd();
 var config = require(runDir + '/config');
 var db = dirty(runDir + '/messages.db');
 
@@ -13,6 +13,8 @@ var storedMessages = new models.Messages();
 db.on('load', function() {
 	storedMessages = new models.Messages(db.get('messages') || []);
 });
+
+var nl = (process.platform === 'win32' ? '\r\n' : '\n');
 
 var Library = {
 
@@ -39,7 +41,9 @@ var Library = {
 
         var getMessagesCallback = function(response){
 
-            var headers = new RegExp(config.messageSeparator,'g');
+            var pattern = config.patterns[config.patternLang];
+
+            var headers = new RegExp(pattern.messageSeparator,'g');
             var matcher = response.match(headers);
             var updatesFound = false;
             if (matcher) {
@@ -48,10 +52,10 @@ var Library = {
 
                     // get header
 
-                    var header = new RegExp(config.messageSeparator,'g');
+                    var header = new RegExp(pattern.messageSeparator,'g');
                     header.exec(matcher[i]); //console.log(RegExp.$2);
-                    for (var index in config.separatorAttributes) {
-                        var attribute = config.separatorAttributes[index];
+                    for (var index in pattern.separatorAttributes) {
+                        var attribute = pattern.separatorAttributes[index];
                         var idx = new Number(index) + 1;
                         message[attribute] = RegExp['$'+idx];
                     }
@@ -66,10 +70,10 @@ var Library = {
                         msgextract = msgextract[1];
                     }
 
-                    var messageExp = new RegExp(config.bodyDefinition.replace(/\\r\\n/g,nl),'g');
+                    var messageExp = new RegExp(pattern.bodyDefinition.replace(/\\r\\n/g,nl),'g');
                     messageExp.exec(msgextract);
-                    for (var index in config.bodyAttributes) {
-                        var attribute = config.bodyAttributes[index];
+                    for (var index in pattern.bodyAttributes) {
+                        var attribute = pattern.bodyAttributes[index];
                         var idx = new Number(index) + 1;
                         message[attribute] = RegExp['$'+idx];
                     }
