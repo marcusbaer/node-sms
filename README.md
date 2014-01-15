@@ -29,13 +29,13 @@ Create `config.js` and set up like this:
 			"de": {
     			"messageSeparator": 'Speicherplatz ([0-9]{1,3}), Ordner "([a-zA-Z]{3,})", ([a-zA-Z\-]{3,}), ([a-zA-Z]{3,})',
     			"separatorAttributes": ['messageId', 'folder', 'storage', 'folderName'],
-				"bodyDefinition": 'SMS-Nachricht\r\nSMSC-Nummer[\s ]*: "([0-9\+]*)"\r\nGesendet[\s ]*: (.*)\r\nZeichenkodierung[\s ]*: (.*)\r\nNummer[\s ]*: "(.*)"\r\nStatus[\s ]*: (.*)\r\n\r\n(.*)',
+				"bodyDefinition": 'SMS-Nachricht\nSMSC-Nummer[\s ]*: "([0-9\+]*)"\nGesendet[\s ]*: (.*)\nZeichenkodierung[\s ]*: (.*)\nNummer[\s ]*: "(.*)"\nStatus[\s ]*: (.*)\n\n(.*)',
 				"bodyAttributes" : ["smsc", "sendDateStr", "encoding", "phoneNumber", "status", "message"]
 			},
 			"en": {
 				"messageSeparator": 'Location ([0-9]{1,3}), folder "([a-zA-Z]{3,})", ([a-zA-Z\- ]{3,}), ([a-zA-Z ]{3,})',
 				"separatorAttributes": ['messageId', 'folder', 'storage', 'folderName'],
-				"bodyDefinition": 'SMS message\r\nSMSC number[\s ]*: "([0-9\+]*)"\r\nSent[\s ]*: (.*)\r\nCoding[\s ]*: (.*)\r\nRemote number[\s ]*: "(.*)"\r\nStatus[\s ]*: (.*)\r\n\r\n(.*)',
+				"bodyDefinition": 'SMS message\nSMSC number[\s ]*: "([0-9\+]*)"\nSent[\s ]*: (.*)\nCoding[\s ]*: (.*)\nRemote number[\s ]*: "(.*)"\nStatus[\s ]*: (.*)\n\n(.*)',
 				"bodyAttributes" : ["smsc", "sendDateStr", "encoding", "phoneNumber", "status", "message"]
 			}
 		}
@@ -60,13 +60,13 @@ smsd has 4 different modes:
 3. a read mode
 4. a send mode
 
-Calling the reader without parameters is the render mode: after a given timeout SMS are called from gateway. If there is a new message, all registered applications are called to fetch messages by calling with read mode.
+Calling the reader without parameters is the render mode: after a given timeout SMS messages are fetched from gateway. If there is a new message, all registered applications are called to fetch messages by calling with read mode.
 
 	smsd
 
 Other command line applications can register to be informed by a call of some command line code:
 
-	smsd --register=foo
+	smsd --register="application --parameter"
 
 Fetch messages with read mode:
 	

@@ -8,7 +8,11 @@ var models = require('./lib/models');
 
 var verbodeMode = argv.v || false;
 var runDir = argv.d || process.cwd();
-var config = require(runDir + '/config');
+try {
+    var config = require(runDir + '/config');
+} catch (e) {
+    throw "No configuration file found. See documentation to add configuration to current working path!";
+}
 var db = dirty(runDir + '/messages.db');
 
 /*
@@ -35,7 +39,25 @@ db.on('load', function() {
 		db.set("listener", listener, function listenerSaved (){
 			console.log(listener);
 		});
-	
+
+    } else if (argv.reset) {
+
+        // RESET STORAGE
+
+        if (argv.reset =='messages') {
+            db.set("messages", []);
+        } else if (argv.reset =='listener') {
+            db.set("listener", []);
+        } else {
+            db.set("messages", []);
+            db.set("listener", []);
+        }
+
+    } else if (argv.watch) {
+
+        // WATCH MESSAGE INPUT AND NOTIFY REGISTERED LISTENER ON UPDATES
+        getMessagesFromGateway();
+
 	} else if (argv.read) {
 
 		// READ DATASOURCE
@@ -65,7 +87,7 @@ db.on('load', function() {
 
 	} else {
 
-		// START SMS READER
+        // WATCH MESSAGE INPUT AND NOTIFY REGISTERED LISTENER ON UPDATES
 		getMessagesFromGateway();
 
 	}
