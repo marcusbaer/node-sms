@@ -51,10 +51,12 @@ db.on('load', function() {
 
         if (argv.reset =='messages') {
             db.set("messages", []);
+            db.set("newmessages", []);
         } else if (argv.reset =='listener') {
             db.set("listener", []);
         } else {
             db.set("messages", []);
+            db.set("newmessages", []);
             db.set("listener", []);
         }
 
@@ -104,24 +106,26 @@ function getMessagesFromGateway () {
 	if (verbodeMode) {
 		sys.log("fetch messages from gateway...");
 	}
-	renderMessages(function(updatesFound){
+	renderMessages(function(updatesFound, newMessages){
 		if (updatesFound) {
 			if (verbodeMode) {
 				sys.log("storing new messages...");
 				console.log(storedMessages.toJSON());
 			}
 			db.set("messages", storedMessages.toJSON(), function messagesSaved (){
-                //sms.deletesms(); // remove all messages
-				listener = db.get('listener') || []; // read from data source, as listener could have been added while running
-				if (listener && listener.length>0) {
-					for (var i=0; i<listener.length; i++) {
-						if (verbodeMode) {
-							sys.log("call listener: " + listener[i]);
-						}
-						sms._command(listener[i]);
-					}
-				}
-			});
+    			db.set("newmessages", newMessages.toJSON(), function newMessagesSaved (){
+                    //sms.deletesms(); // remove all messages
+                    listener = db.get('listener') || []; // read from data source, as listener could have been added while running
+                    if (listener && listener.length>0) {
+                        for (var i=0; i<listener.length; i++) {
+                            if (verbodeMode) {
+                                sys.log("call listener: " + listener[i]);
+                            }
+                            sms._command(listener[i]);
+                        }
+                    }
+                });
+            });
 		}
 	});
 	setTimeout(getMessagesFromGateway, config.timeout);
@@ -134,7 +138,8 @@ function renderMessages (callback) {
 //		if (verbodeMode) {
 //			sys.log(response);
 //		}
-	
+
+        var newMessages = new models.Messages();
 		var pattern = config.patterns[config.patternLang];
 	
 		var headers = new RegExp(pattern.messageSeparator,'g');
@@ -177,12 +182,13 @@ function renderMessages (callback) {
 				if (_.isEmpty(matchingMessages)) {
 					updatesFound = true;
 					storedMessages.add(message);
+                    newMessages.add(message);
 				}
 			}
 		}
 
 		if (callback) {
-			callback(updatesFound);
+			callback(updatesFound, newMessages);
 		}
 
 	};

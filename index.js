@@ -37,6 +37,14 @@ var Library = {
         }
 	},
 
+    readNewMessagesFromDb: function (callback) {
+        var newMessages = new models.Messages();
+        db.on('load', function() {
+            newMessages = new models.Messages(db.get('newmessages') || []);
+            callback(newMessages);
+        });
+    },
+
     fetchMessagesFromGateway: function (callback) {
 
         var getMessagesCallback = function(response){
