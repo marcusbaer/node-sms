@@ -14,6 +14,8 @@ if (argv.v) {
     sys.log("Read smsd configuration from " + runDir + '/config.js');
 }
 
+var watchMode = false;
+
 try {
     var config = require(runDir + '/config');
 } catch (e) {
@@ -141,10 +143,8 @@ function log (text) {
 }
 
 function startDaemon (watch) {
+    watchMode = watch;
     getAllMessagesFromGateway();
-    if (watch) {
-        setTimeout(getAllMessagesFromGateway, config.timeout || 30000);
-    }
 }
 
 function getAllMessagesFromGateway () {
@@ -156,6 +156,9 @@ function getAllMessagesFromGateway () {
         writeMessagesToLog(newMessages);
         removeAllMessagesFromGateway();
     });
+    if (watchMode) {
+        setTimeout(getAllMessagesFromGateway, config.timeout || 30000);
+    }
 }
 
 function removeAllMessagesFromGateway () {
