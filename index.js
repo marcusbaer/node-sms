@@ -1,107 +1,42 @@
 ﻿var argv = require('optimist').argv;
 var models = require('./lib/models');
-var dirty = require('dirty');
+//var dirty = require('dirty');
+var fs = require('fs');
 var sms = require('./lib/sms');
 
 //var runDir = argv.d || process.cwd();
 var runDir = process.cwd();
 var config = require(runDir + '/config');
-var db = dirty(runDir + '/messages.db');
 
-var storedMessages = new models.Messages();
-
-db.on('load', function() {
-	storedMessages = new models.Messages(db.get('messages') || []);
-});
+var storageDir = '/tmp/.smsd/';
 
 var nl = (process.platform === 'win32' ? '\r\n' : '\n');
 
+function utf8 (txt) {
+    // http://www.developershome.com/sms/gsmAlphabet.asp
+    // http://spin.atomicobject.com/2011/09/08/converting-utf-8-to-the-7-bit-gsm-default-alphabet/
+    return new Buffer(txt).toString('utf8');
+}
+
 var Library = {
 
-	removeMessagesFromGateway: function (callback) {
-		//sms.deletesms(callback);
-	},
-
-	removeMessagesFromDb: function (callback) {
-		//not implemented yet
-	},
-
-	readMessagesFromDb: function (callback) {
-        if (storedMessages && storedMessages.length>0) {
-            callback(storedMessages);
-        } else {
-            db.on('load', function() {
-                storedMessages = new models.Messages(db.get('messages') || []);
-                callback(storedMessages);
-            });
-        }
-	},
-
-    readNewMessagesFromDb: function (callback) {
+    readNewMessagesAsModelFromFile: function (callback) {
         var newMessages = new models.Messages();
-        db.on('load', function() {
-            newMessages = new models.Messages(db.get('newmessages') || []);
+        this.readAllMessagesFromFile(function(messagesAsStr){
+            newMessages = new models.Messages(JSON.parse(messagesAsStr));
             callback(newMessages);
         });
     },
 
-    fetchMessagesFromGateway: function (callback) {
-
-        var getMessagesCallback = function(response){
-
-            var pattern = config.patterns[config.patternLang];
-
-            var headers = new RegExp(pattern.messageSeparator,'g');
-            var matcher = response.match(headers);
-            var updatesFound = false;
-            if (matcher) {
-                for (var i=0; i<matcher.length; i++) {
-                    var message = {};
-
-                    // get header
-
-                    var header = new RegExp(pattern.messageSeparator,'g');
-                    header.exec(matcher[i]); //console.log(RegExp.$2);
-                    for (var index in pattern.separatorAttributes) {
-                        var attribute = pattern.separatorAttributes[index];
-                        var idx = new Number(index) + 1;
-                        message[attribute] = RegExp['$'+idx];
-                    }
-
-                    // get body
-
-                    var msgextract = response.split(matcher[i]);
-                    if (matcher[i+1]) {
-                        msgextract = msgextract[1].split(matcher[i+1]);
-                        msgextract = msgextract[0];
-                    } else {
-                        msgextract = msgextract[1];
-                    }
-
-                    var messageExp = new RegExp(pattern.bodyDefinition.replace(/\\r\\n/g,nl),'g');
-                    messageExp.exec(msgextract);
-                    for (var index in pattern.bodyAttributes) {
-                        var attribute = pattern.bodyAttributes[index];
-                        var idx = new Number(index) + 1;
-                        message[attribute] = RegExp['$'+idx];
-                    }
-                    message.hash = encode(message.sendDateStr + message.phoneNumber + 'smsd');
-
-                    var matchingMessages = storedMessages.where({hash: message.hash});
-                    if (_.isEmpty(matchingMessages)) {
-                        storedMessages.add(message);
-                    }
-                }
+    readAllMessagesFromFile: function (next) {
+        fs.readFile(storageDir+'messages.json', function(err, messagesAsStr){
+            messagesAsStr = utf8(messagesAsStr);
+            if (err) {
+                throw err;
+            } else if (next) {
+                next(messagesAsStr);
             }
-
-            if (callback) {
-                callback(updatesFound);
-            }
-
-        };
-
-        sms.getsms(getMessagesCallback);
-
+        });
     },
 
 	registerCommand: function (command, callback) {

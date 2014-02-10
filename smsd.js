@@ -22,7 +22,7 @@ try {
 
 var db = dirty(runDir + '/listener.db');
 
-var storageDir = 'data/';
+var storageDir = '/tmp/.smsd/';
 
 
 /*
