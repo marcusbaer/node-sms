@@ -16,5 +16,6 @@ node_modules
 pids
 logs
 results
+data
 
 npm-debug.log

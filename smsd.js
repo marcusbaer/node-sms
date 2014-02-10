@@ -6,11 +6,13 @@ var dirty = require('dirty');
 var sms = require('./lib/sms');
 var models = require('./lib/models');
 
-var verbodeMode = argv.v || false;
+var verboseMode = argv.v || false;
 //var runDir = (argv.d && !argv.demo) || process.cwd();
 var runDir = process.cwd();
 
-sys.log("Read smsd configuration from " + runDir + '/config.js');
+if (argv.v) {
+    sys.log("Read smsd configuration from " + runDir + '/config.js');
+}
 
 try {
     var config = require(runDir + '/config');
@@ -18,7 +20,10 @@ try {
     throw "No configuration file found. See documentation to add configuration to current working path!";
 }
 
-var db = dirty(runDir + '/messages.db');
+var db = dirty(runDir + '/listener.db');
+
+var storageDir = 'data/';
+
 
 /*
 	SMSD can be called with an optional register parameter, that allows a script to register as a service that likes to be informed about incoming messages.
@@ -28,13 +33,10 @@ var db = dirty(runDir + '/messages.db');
 var nl = (process.platform === 'win32' ? '\r\n' : '\n');
 
 var listener = [];
-
-storedMessages = new models.Messages();
+//var messages = new models.Messages();
 
 db.on('load', function() {
 	listener = db.get('listener') || [];
-	storedMessages = new models.Messages(db.get('messages') || []);
-//    db.forEach(function(key, val) { console.log('Found key: %s, val: %j', key, val); });
 
 	if (argv.register) {
 
@@ -47,31 +49,22 @@ db.on('load', function() {
 
     } else if (argv.reset) {
 
-        // RESET STORAGE
-
-        if (argv.reset =='messages') {
-            db.set("messages", []);
-            db.set("newmessages", []);
-        } else if (argv.reset =='listener') {
-            db.set("listener", []);
-        } else {
-            db.set("messages", []);
-            db.set("newmessages", []);
+        if (argv.reset =='listener') {
             db.set("listener", []);
         }
 
     } else if (argv.watch) {
 
         // WATCH MESSAGE INPUT AND NOTIFY REGISTERED LISTENER ON UPDATES
-        getMessagesFromGateway();
+        startDaemon(true);
 
 	} else if (argv.read) {
 
-		// READ DATASOURCE
+        // READ MESSAGES FROM GATEWAY AND RETURN DATA
+        fetchMessages(function(newMessages){
+            process.stdout.write(JSON.stringify(newMessages.toJSON()));
+        });
 
-		//process.stdout.write(JSON.stringify(db.get('messages')));
-		process.stdout.write(JSON.stringify(storedMessages.toJSON()));
-	
 	} else if (argv.send) {
 
 		// SEND MESSAGE
@@ -95,47 +88,87 @@ db.on('load', function() {
 	} else {
 
         // WATCH MESSAGE INPUT AND NOTIFY REGISTERED LISTENER ON UPDATES
-		getMessagesFromGateway();
+		startDaemon(false);
 
 	}
-
 
 });
 
-function getMessagesFromGateway () {
-	if (verbodeMode) {
-		sys.log("fetch messages from gateway...");
-	}
-	renderMessages(function(updatesFound, newMessages){
-		if (updatesFound) {
-			if (verbodeMode) {
-				sys.log("storing new messages...");
-				console.log(storedMessages.toJSON());
-			}
-			db.set("messages", storedMessages.toJSON(), function messagesSaved (){
-    			db.set("newmessages", newMessages.toJSON(), function newMessagesSaved (){
-                    //sms.deletesms(); // remove all messages
-                    listener = db.get('listener') || []; // read from data source, as listener could have been added while running
-                    if (listener && listener.length>0) {
-                        for (var i=0; i<listener.length; i++) {
-                            if (verbodeMode) {
-                                sys.log("call listener: " + listener[i]);
-                            }
-                            sms._command(listener[i]);
-                        }
-                    }
-                });
-            });
-		}
-	});
-	setTimeout(getMessagesFromGateway, config.timeout);
+function saveAllMessagesToFile (newMessages, next) {
+    var messagesAsStr = JSON.stringify(newMessages.toJSON());
+    if (verboseMode) {
+        sys.log("save to file system...");
+        sys.log(messagesAsStr);
+    }
+    fs.writeFile(storageDir+'messages.json', messagesAsStr, function(){
+        if (next) {
+            next(newMessages);
+        }
+    });
 }
 
-function renderMessages (callback) {
+function writeMessagesToLog (newMessages) {
+    if (verboseMode) {
+        sys.log("write to log...");
+    }
+    var messagesAsStr = '';
+    newMessages.forEach(function(message){
+        messagesAsStr = messagesAsStr + JSON.stringify(message.attributes) + "\n";
+        log(messagesAsStr);
+    });
+}
+
+function log (text) {
+    var d = new Date();
+    fs.appendFile(storageDir+'log.txt', d.toJSON() + "\t" + text, function(){});
+}
+
+function startDaemon (watch) {
+    getAllMessagesFromGateway();
+    if (watch) {
+        setTimeout(getAllMessagesFromGateway, config.timeout || 30000);
+    }
+}
+
+function getAllMessagesFromGateway () {
+    if (verboseMode) {
+        sys.log("fetch all messages from gateway...");
+    }
+    fetchMessages(function(newMessages){
+        saveAllMessagesToFile(newMessages, notifyListeners);
+        writeMessagesToLog(newMessages);
+        removeAllMessagesFromGateway();
+    });
+}
+
+function removeAllMessagesFromGateway () {
+    if (verboseMode) {
+        sys.log("remove all messages from gateway...");
+    }
+    sms.deletesms(); // remove all messages
+}
+
+function notifyListeners () {
+    if (verboseMode) {
+        sys.log("notify listeners...");
+    }
+    listener = db.get('listener') || []; // read from data source, as listener could have been added while running
+    if (listener && listener.length>0) {
+        for (var i=0; i<listener.length; i++) {
+            if (verboseMode) {
+                sys.log("call listener: " + listener[i]);
+            }
+            log('notify listener ' + listener[i]);
+            sms._command(listener[i]);
+        }
+    }
+}
+
+function fetchMessages (callback) {
 
 	var getMessagesCallback = function(response){
 
-//		if (verbodeMode) {
+//		if (verboseMode) {
 //			sys.log(response);
 //		}
 
@@ -178,17 +211,17 @@ function renderMessages (callback) {
 				}
 				message.hash = encode(message.sendDateStr + message.phoneNumber + 'smsd');
 
-				var matchingMessages = storedMessages.where({hash: message.hash});
-				if (_.isEmpty(matchingMessages)) {
+//				var matchingMessages = storedMessages.where({hash: message.hash});
+//				if (_.isEmpty(matchingMessages)) {
 					updatesFound = true;
-					storedMessages.add(message);
+//					storedMessages.add(message);
                     newMessages.add(message);
-				}
+//				}
 			}
 		}
 
-		if (callback) {
-			callback(updatesFound, newMessages);
+		if (updatesFound && callback) {
+			callback(newMessages);
 		}
 
 	};
