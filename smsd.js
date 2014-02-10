@@ -58,11 +58,18 @@ db.on('load', function() {
         // WATCH MESSAGE INPUT AND NOTIFY REGISTERED LISTENER ON UPDATES
         startDaemon(true);
 
-	} else if (argv.read) {
+    } else if (argv.fetch) {
 
-        // READ MESSAGES FROM GATEWAY AND RETURN DATA
+        // FETCH MESSAGES FROM GATEWAY AND RETURN DATA
         fetchMessages(function(newMessages){
             process.stdout.write(JSON.stringify(newMessages.toJSON()));
+        });
+
+    } else if (argv.read) {
+
+        // FETCH MESSAGES FROM FILE AND RETURN DATA
+        readAllMessagesFromFile(function(messagesAsStr){
+            process.stdout.write(messagesAsStr || '');
         });
 
 	} else if (argv.send) {
@@ -93,6 +100,16 @@ db.on('load', function() {
 	}
 
 });
+
+function readAllMessagesFromFile (next) {
+    fs.readFile(storageDir+'messages.json', function(err, messagesAsStr){
+        if (err) {
+            throw err;
+        } else if (next) {
+            next(messagesAsStr);
+        }
+    });
+}
 
 function saveAllMessagesToFile (newMessages, next) {
     var messagesAsStr = JSON.stringify(newMessages.toJSON());

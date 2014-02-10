@@ -99,7 +99,7 @@ Create `gammurc` file on Linux like:
 On Windows `gammurc` file is in the same directory as gammu.exe is or in the same directory where you will call gammu. Read more about configuration [here](http://wammu.eu/docs/manual/config/).
 
 	[gammu]
-	port = /dev/ttyS0
+	port = /dev/ttyUSB0
 	;port= com10:
 	connection = at115200
 	;synchronizetime = yes
